@@ -1,8 +1,9 @@
 package main
 
 import (
+	"cloud-backup/pkg/googleDrive"
 	"fmt"
-	"myModule/pkg/files"
+
 	"os"
 
 	"github.com/spf13/cobra"
@@ -15,7 +16,9 @@ func main() {
 		Use:   "backup",
 		Short: "CLI tool for cloud file backups",
 		Run: func(cmd *cobra.Command, args []string) {
-			files.ReadLocalFile(fileName)
+			cred := googleDrive.GetCredentials()
+			config := googleDrive.OauthInit(cred)
+			token := googleDrive.FetchToken(config)
 		},
 	}
 
