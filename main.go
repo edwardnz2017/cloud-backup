@@ -19,6 +19,7 @@ func main() {
 			cred := googleDrive.GetCredentials()
 			config := googleDrive.OauthInit(cred)
 			token := googleDrive.FetchToken(config)
+			fmt.Println(token)
 		},
 	}
 
