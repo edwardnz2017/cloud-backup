@@ -30,6 +30,8 @@ func OauthInit(cred []byte) *oauth2.Config {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
 
+	config.RedirectURL = "urn:ietf:wg:oauth:2.0:oob"
+
 	return config
 }
 
