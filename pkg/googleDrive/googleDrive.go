@@ -12,6 +12,7 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/drive/v3"
+	"google.golang.org/api/option"
 )
 
 func GetCredentials() []byte {
@@ -25,7 +26,7 @@ func GetCredentials() []byte {
 }
 
 func OauthInit(cred []byte) *oauth2.Config {
-	config, err := google.ConfigFromJSON(cred, drive.DriveFileScope)
+	config, err := google.ConfigFromJSON(cred, drive.DriveScope)
 	if err != nil {
 		log.Fatalf("Unable to parse client secret file to config: %v", err)
 	}
@@ -44,6 +45,16 @@ func FetchToken(config *oauth2.Config) *oauth2.Token {
 	}
 
 	return token
+}
+
+func CreateDriveService(config *oauth2.Config, context context.Context, token *oauth2.Token) *drive.Service {
+	client := config.Client(context, token)
+	service, err := drive.NewService(context, option.WithHTTPClient(client))
+	if err != nil {
+		log.Fatalf("Unable to retrieve Drive client: %v", err)
+	}
+
+	return service
 }
 
 func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
@@ -65,6 +76,12 @@ func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
 }
 
 func saveToken(path string, token *oauth2.Token) {
+	// creates directory if non existent
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		log.Fatalf("Unable to create directory for token file: %v", err)
+	}
+
 	fmt.Printf("Saving credential file to: %s\n", path)
 	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
